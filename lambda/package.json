@@ -1,0 +1,21 @@
+{
+    "name": "caf_hellolambda_lambda",
+    "description": "Cloud Assistants example: connecting IoT with AWS Lambda",
+    "version": "0.2.1",
+    "author": "Antonio Lain <antlai@cafjs.com>",
+    "dependencies": {
+        "caf_components": "^0.2.0",
+        "caf_cli": "^0.2.0",
+        "aws-sdk" : "2.3.0"
+    },
+    "devDependencies": {
+        "nodeunit" : ">=0.9"
+    },
+    "scripts": {
+       "start" : "node ./index.js",
+        "test": "node ./node_modules/.bin/nodeunit",
+        "build": "npm install --production; rm -f /tmp/all.zip ; rm -fr node_modules/aws-sdk; zip -r /tmp/all.zip . "
+    },
+    "main": "index",
+    "engines": { "node": ">= 0.10.29" }
+}
