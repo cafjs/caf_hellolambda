@@ -15,77 +15,69 @@ limitations under the License.
 */
 
 "use strict";
-
-var AWS = require('aws-sdk');
 var caf_comp = require('caf_components');
 var async = caf_comp.async;
 var myUtils = caf_comp.myUtils;
 var caf_cli = require('caf_cli');
+var utils_s3 = require('./utils_s3');
 
-var s3 = new AWS.S3();
-
-var SECRET_KEY = 'secret';
-
-var getMany = function(bucket, all) {
-    return function(cb0) {
-        var keys = Object.keys(all);
-        async.map(keys, function(key, cb1) {
-            s3.getObject({
-                Bucket: bucket,
-                Key: key
-            }, cb1);
-        }, function(err, res) {
-            if (err) {
-                cb0(err);
-            } else {
-                var result = {};
-                keys.forEach(function(key, i) {
-                    result[key] = res[i].toString();
-                });
-                cb0(err, result);
-            }
-        });
-    };
-};
 
 exports.handler = function(event, context) {
 
     var bucket =  event.Records[0].s3.bucket.name;
     var key =  decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
-    var allKeys = {secret: true, caURL : true };
+    var allKeys = {caURL : true };
     allKeys[key] = true;
-    
-    async.waterfall([        
-
-        getMany(bucket, allKeys),
-        
+    var cli = null;
+    var request = null;
+    var listAll = null;
+    async.waterfall([
+        function(cb0) {
+            utils_s3.listAll(bucket, cb0);
+        },          
+        function(list, cb0) {
+            listAll = list;
+            utils_s3.getMany(bucket, allKeys, cb0);
+        },        
         function (all, cb0) {
             var cbOnce0 = myUtils.callJustOnce(function(err) {
                 err && console.log('Ignoring >1 calls ' + myUtils.errToPrettyStr(err));
             }, cb0);
-            
-            var cli = new caf_cli.Session(all.caURL, {
+
+            cli = new caf_cli.Session(all.caURL, {
                 disableBackchannel : true
             });
-            
-            cli.onopen = function() {
-                cli.handleLambda(all.secret, key, all[key], function(err, res) {
-                    cli.onclose = function(error) {
-                        if (err || error) {
-                            cbOnce0(err || error);
-                        } else {
-                            cbOnce0(null, res);
-                        }
-                    };
-                    cli.close();
-                });
+
+            cli.onclose = function(error) {
+                cbOnce0(error || (new Error('Unexpected close')));
             };
 
-            cli.onerror = function(err) {
-                cbOnce0(err);
+            cli.onopen = function() {
+                cli.handleLambda(listAll, key, all[key], cbOnce0);
             };
+        },
+        function (req, cb0) {
+            request = req;
+            utils_s3.comboMany(bucket, req, cb0);
+        },
+        function(resp, cb0) {
+            var cbOnce0 = myUtils.callJustOnce(function(err) {
+                err && console.log('Ignoring >1 calls ' + myUtils.errToPrettyStr(err));
+            }, cb0);
+            
+            cli.onclose = function(error) {
+                cbOnce0(error || (new Error('Unexpected close')));
+            };
+
+            cli.handleLambdaResponse(request, resp, cbOnce0);
         }
     ], function(err, res) {
-        context.done(err, res);
+        cli.onclose = function(error) {
+            if (err || error) {
+                 console.log(myUtils.errToPrettyStr(err || error));
+            }
+            context.done(err || error, res);
+        };
+        cli.close();
     });
 };
