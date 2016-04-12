@@ -21,63 +21,72 @@ var myUtils = caf_comp.myUtils;
 var caf_cli = require('caf_cli');
 var utils_s3 = require('./utils_s3');
 
+var FROM_CLOUD_PREFIX = 'fromCloud';
 
 exports.handler = function(event, context) {
 
     var bucket =  event.Records[0].s3.bucket.name;
     var key =  decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
-    var allKeys = {caURL : true };
-    allKeys[key] = true;
-    var cli = null;
-    var request = null;
-    var listAll = null;
-    async.waterfall([
-        function(cb0) {
-            utils_s3.listAll(bucket, cb0);
-        },          
-        function(list, cb0) {
-            listAll = list;
-            utils_s3.getMany(bucket, allKeys, cb0);
-        },        
-        function (all, cb0) {
-            var cbOnce0 = myUtils.callJustOnce(function(err) {
-                err && console.log('Ignoring >1 calls ' + myUtils.errToPrettyStr(err));
-            }, cb0);
+    if (key.indexOf(FROM_CLOUD_PREFIX) === 0) {
+        context.done();
+    } else {
+        var allKeys = {caURL : true };
+        allKeys[key] = true;
+        var cli = null;
+        var request = null;
+        var listAll = null;
+        async.waterfall([
+            function(cb0) {
+                utils_s3.listAll(bucket, cb0);
+            },          
+            function(list, cb0) {
+                listAll = list;
+                utils_s3.getMany(bucket, allKeys, cb0);
+            },        
+            function (all, cb0) {
+                var cbOnce0 = myUtils.callJustOnce(function(err) {
+                    err && console.log('Ignoring >1 calls ' + myUtils.errToPrettyStr(err));
+                }, cb0);
 
-            cli = new caf_cli.Session(all.caURL, {
-                disableBackchannel : true
-            });
+                cli = new caf_cli.Session(all.caURL, {
+                    disableBackchannel : true
+                });
 
-            cli.onclose = function(error) {
-                cbOnce0(error || (new Error('Unexpected close')));
-            };
+                cli.onclose = function(error) {
+                    cbOnce0(error || (new Error('Unexpected close')));
+                };
 
-            cli.onopen = function() {
-                cli.handleLambda(listAll, key, all[key], cbOnce0);
-            };
-        },
-        function (req, cb0) {
-            request = req;
-            utils_s3.comboMany(bucket, req, cb0);
-        },
-        function(resp, cb0) {
-            var cbOnce0 = myUtils.callJustOnce(function(err) {
-                err && console.log('Ignoring >1 calls ' + myUtils.errToPrettyStr(err));
-            }, cb0);
-            
-            cli.onclose = function(error) {
-                cbOnce0(error || (new Error('Unexpected close')));
-            };
+                cli.onopen = function() {
+                    cli.handleLambda(listAll, key, all[key], cbOnce0);
+                };
+            },
+            function (req, cb0) {
+                request = req;
+                utils_s3.comboMany(bucket, req, cb0);
+            },
+            function(resp, cb0) {
+                var cbOnce0 = myUtils.callJustOnce(function(err) {
+                    err && console.log('Ignoring >1 calls ' + myUtils.errToPrettyStr(err));
+                }, cb0);
+                
+                cli.onclose = function(error) {
+                    cbOnce0(error || (new Error('Unexpected close')));
+                };
 
-            cli.handleLambdaResponse(request, resp, cbOnce0);
-        }
-    ], function(err, res) {
-        cli.onclose = function(error) {
-            if (err || error) {
-                 console.log(myUtils.errToPrettyStr(err || error));
+                cli.handleLambdaResponse(request, resp, cbOnce0);
             }
-            context.done(err || error, res);
-        };
-        cli.close();
-    });
+        ], function(err, res) {
+            if (cli) {
+                cli.onclose = function(error) {
+                    if (err || error) {
+                        console.log(myUtils.errToPrettyStr(err || error));
+                    }
+                    context.done(err || error, res);
+                };
+                cli.close();
+            } else {
+                context.done(err);
+            }
+        });
+    }
 };
