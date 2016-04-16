@@ -1,0 +1,13 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+pushd  $DIR > /dev/null
+pushd ../../ > /dev/null
+
+all=`git rev-list --count HEAD | awk '{print "Changes."$1}'`
+echo $all
+
+git diff  HEAD^ HEAD > $all
+
+popd > /dev/null
+popd > /dev/null
+

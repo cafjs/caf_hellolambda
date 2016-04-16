@@ -21,6 +21,8 @@ var AWS = require('aws-sdk');
 
 var s3 = new AWS.S3();
 
+var DEFAULT_MODE = '33188'; //files with permission 644
+
 var getMany = exports.getMany = function(bucket, all, cb0) {
     var keys = Object.keys(all);
     async.map(keys, function(key, cb1) {
@@ -34,7 +36,7 @@ var getMany = exports.getMany = function(bucket, all, cb0) {
         } else {
             var result = {};
             keys.forEach(function(key, i) {
-                result[key] = res[i].Body.toString().trim();
+                result[key] = res[i].Body.toString();
             });
             console.log(JSON.stringify(result));
             cb0(err, result);
@@ -48,7 +50,10 @@ var putMany = exports.putMany = function(bucket, all, cb0) {
         s3.putObject({
             Bucket: bucket,
             Key: key,
-            Body : all[key]
+            Body : all[key],
+            Metadata : {
+                mode:  DEFAULT_MODE
+            }
         }, cb1);
     }, cb0);
 };
@@ -91,8 +96,13 @@ var comboMany = exports.comboMany = function(bucket, all, cb0) {
     });
 };
 
-var listAll = exports.listAll = function(bucket, cb0) {
+var listAll = exports.listAll = function(bucket, prefix, cb0) {
     s3.listObjects({
-        Bucket: bucket
+        Bucket: bucket,
+        Prefix: prefix
     }, cb0);    
+};
+
+var extractKeys = exports.extractKeys = function(list) {
+    return list.Contents.map(function(x) { return x.Key; });    
 };
