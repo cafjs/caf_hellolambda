@@ -67,6 +67,7 @@ exports.handler = function(event, context) {
             },
             function (req, cb0) {
                 request = req;
+                console.log('From CA: ' + JSON.stringify(req));
                 utils_s3.comboMany(bucket, req, cb0);
             }
         ], function(err, res) {

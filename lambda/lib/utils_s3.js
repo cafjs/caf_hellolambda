@@ -60,8 +60,7 @@ var putMany = exports.putMany = function(bucket, all, cb0) {
 
 
 var deleteMany = exports.deleteMany = function(bucket, all, cb0) {
-    var keys = Object.keys(all);
-    async.map(keys, function(key, cb1) {
+    async.map(all, function(key, cb1) {
         s3.deleteObject({
             Bucket: bucket,
             Key: key
