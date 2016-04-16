@@ -1,0 +1,47 @@
+aws lambda create-function \
+--region us-west-2 \
+--function-name caf_hellolambda \
+--code S3Bucket=root-hellolambda,S3Key=all.zip \
+--role arn:aws:iam::091012717146:role/hellolambda \
+--handler index.handler \
+--runtime nodejs \
+--profile cafjs \
+--timeout 10 \
+--memory-size 128
+
+
+
+aws lambda add-permission \
+--region us-west-2 \
+--function-name caf_hellolambda \
+--statement-id 1 \
+--principal s3.amazonaws.com \
+--action lambda:InvokeFunction \
+--source-arn arn:aws:s3:::cafjs-test \
+--source-account  091012717146 \
+--profile cafjs
+
+
+lambda_function_arn=$(aws lambda get-function-configuration \
+  --function-name caf_hellolambda \
+  --output text \
+  --query 'FunctionArn'
+)
+echo lambda_function_arn=$lambda_function_arn
+
+aws s3api put-bucket-notification-configuration \
+  --bucket cafjs-test \
+  --notification-configuration '{
+    "LambdaFunctionConfigurations": [{
+      "LambdaFunctionArn": "'$lambda_function_arn'",
+      "Filter" : {
+         "Key" : {
+            "FilterRules" : [{
+                    "Name" : "prefix",
+                    "Value" : "Changes."
+            }]
+         }
+      },        
+      "Events": ["s3:ObjectCreated:*"]
+    }]
+  }'

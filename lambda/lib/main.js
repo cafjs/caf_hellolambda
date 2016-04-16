@@ -29,7 +29,7 @@ exports.handler = function(event, context) {
     var bucket =  event.Records[0].s3.bucket.name;
     var key = decodeURIComponent(event.Records[0].s3.object.key
                                  .replace(/\+/g, " "));
-    if (key.indexOf(CHANGE_PREFIX) === 0) {
+    if (key.indexOf(CHANGES_PREFIX) === 0) {
         var allKeys = {caURL : true };
         allKeys[key] = true;
         var cli = null;

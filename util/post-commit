@@ -1,12 +1,19 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CLOUD_DIR=${CLOUD_DIR:-'cloud'}
 pushd  $DIR > /dev/null
 pushd ../../ > /dev/null
 
-all=`git rev-list --count HEAD | awk '{print "Changes."$1}'`
+all=`git rev-list --count HEAD 2> /dev/null | awk '{print "Changes."$1}'`
 echo $all
 
-git diff  HEAD^ HEAD > $all
+if [ "$all" == "Changes.1" ]
+then
+    git show | sed -ne '/diff/,$p' >  ${CLOUD_DIR}/Changes.1
+else
+    git diff  HEAD^ HEAD > ${CLOUD_DIR}/$all
+fi
+
 
 popd > /dev/null
 popd > /dev/null
