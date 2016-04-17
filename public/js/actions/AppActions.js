@@ -68,7 +68,7 @@ var AppActions = {
     }
 };
 
-['changePinMode', 'changePinValue', 'deletePin','getState','setSecret']
+['changePinMode', 'changePinValue', 'deletePin','getState']
     .forEach(function(x) {
         AppActions[x] = function() {
             var args = Array.prototype.slice.call(arguments);

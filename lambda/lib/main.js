@@ -51,8 +51,9 @@ exports.handler = function(event, context) {
                     err && console.log('Ignoring >1 calls ' +
                                        myUtils.errToPrettyStr(err));
                 }, cb0);
-
-                cli = new caf_cli.Session(all.caURL.trim(), {
+                var url = all.caURL.trim().replace('session=default',
+                                                   'session=lambda');
+                cli = new caf_cli.Session(url, {
                     disableBackchannel : true
                 });
 
