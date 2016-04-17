@@ -26,6 +26,9 @@ var MyApp = {
             deviceURL : window.location.href
         });
     },
+    doReset : function() {
+        AppActions.reset();
+    },
     render: function() {
         return cE("div", {className: "container-fluid"},
                   cE(DisplayError, {
@@ -64,7 +67,14 @@ var MyApp = {
                                      bsStyle: 'primary'
                                  },
                                     'Show')
-                                )
+                                ),
+                               cE(rB.Col, {xs:12, sm:6},
+                                 cE(rB.Button, {
+                                     onClick: this.doReset,
+                                     bsStyle: 'danger'
+                                 },
+                                    'Reset')
+                                 )
                              )
                           )
                        ),

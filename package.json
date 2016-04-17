@@ -1,7 +1,7 @@
 {
   "name": "caf_hellolambda",
   "description": "Cloud Assistants example: connecting IoT with AWS Lambda",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": "Antonio Lain <antlai@cafjs.com>",
     "dependencies": {
       "diff" : "^2.2.2",
