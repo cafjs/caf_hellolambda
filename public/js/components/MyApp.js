@@ -58,7 +58,7 @@ var MyApp = {
                                    )
                                 )
                   },
-                     cE(rB.Panel, {header: "Display caURL file"},
+                     cE(rB.Panel, {header: "Manage"},
                         cE(rB.Grid, null,
                            cE(rB.Row, null,
                               cE(rB.Col, {xs:12, sm:6},
@@ -66,7 +66,7 @@ var MyApp = {
                                      onClick: this.doDisplayURL,
                                      bsStyle: 'primary'
                                  },
-                                    'Show')
+                                    'Show caURL')
                                 ),
                                cE(rB.Col, {xs:12, sm:6},
                                  cE(rB.Button, {
