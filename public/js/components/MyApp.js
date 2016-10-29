@@ -38,7 +38,7 @@ var MyApp = {
                       deviceURL: this.state.deviceURL
                   }),                  
                   cE(rB.Panel, {
-                      header: cE(rB.Grid, null,
+                      header: cE(rB.Grid, {fluid: true},
                                  cE(rB.Row, null,
                                     cE(rB.Col, {sm:1, xs:1},
                                        cE(AppStatus, {
@@ -59,7 +59,7 @@ var MyApp = {
                                 )
                   },
                      cE(rB.Panel, {header: "Manage"},
-                        cE(rB.Grid, null,
+                        cE(rB.Grid, {fluid: true},
                            cE(rB.Row, null,
                               cE(rB.Col, {xs:12, sm:6},
                                  cE(rB.Button, {
