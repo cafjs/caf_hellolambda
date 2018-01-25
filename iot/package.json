@@ -1,11 +1,11 @@
 {
   "name": "caf_iot_hellolambda",
   "description": "Cloud Assistants IoT example (Device)",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "author": "Antonio Lain <antlai@cafjs.com>",
   "dependencies": {
-      "caf_iot" : "^0.2.0",
-      "caf_rpi_gpio" : "^0.2.0"
+      "caf_iot" : "^0.3.0",
+      "caf_rpi_gpio" : "^0.3.0"
    },
     "scripts": {
        "start" : "node ./index.js",
