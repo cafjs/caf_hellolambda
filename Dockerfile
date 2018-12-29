@@ -6,7 +6,7 @@
 # TO_RUN:         cafjs run --appImage gcr.io/cafjs-k8/root-hellolambda hellolambda
 
 
-FROM node:8
+FROM node:10
 
 EXPOSE 3000
 
