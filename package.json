@@ -4,7 +4,7 @@
   "version": "0.3.0",
   "author": "Antonio Lain <antlai@cafjs.com>",
     "dependencies": {
-      "diff" : "^2.2.2",
+      "diff" : "^4.0.1",
       "caf_react" :"^0.3.0",
       "caf_core": "^0.3.0",
       "caf_transport" : "^0.3.0",
